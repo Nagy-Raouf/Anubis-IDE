@@ -31,10 +31,10 @@ STYLES = {
       'operator': format('red'),
        'brace': format('darkGray'),
        'class': format('blue'),
+       'classID': format('black', 'bold italic'),
        'string': format('magenta'),
        'string2': format('darkMagenta'),
        'comment': format('darkGreen', 'italic'),
-       'classID': format('black', 'italic'),
        'numbers': format('purple'),
         'logicalOperators': format('green'),
         'literalKeywords':format('lightBlue'),
@@ -141,12 +141,14 @@ class CSharpHighlighter(QSyntaxHighlighter):
                   for b in CSharpHighlighter.braces]
         rules += [(r'%s' % b, 0, STYLES['logicalOperators'])
                   for b in CSharpHighlighter.logicalOperators]
-        rules += [(r'%s' % b, 0, STYLES['literalKeywords'])
-                  for b in CSharpHighlighter.literalKeywords]
-        rules += [(r'%s' % b, 0, STYLES['accessKeywords'])
-                  for b in CSharpHighlighter.accessKeywords]
-        rules += [(r'%s' % b, 0, STYLES['typeKeywords'])
-                  for b in CSharpHighlighter.typeKeywords]
+        
+        rules += [(r'\b%s\b' % w, 0, STYLES['literalKeywords'])
+                  for w in CSharpHighlighter.literalKeywords]
+        rules += [(r'\b%s\b' % w, 0, STYLES['accessKeywords'])
+                  for w in CSharpHighlighter.accessKeywords]
+        rules += [(r'\b%s\b' % w, 0, STYLES['typeKeywords'])
+                  for w in CSharpHighlighter.typeKeywords]
+    
 
         # All other rules
         rules += [
@@ -156,8 +158,10 @@ class CSharpHighlighter(QSyntaxHighlighter):
             # Single-quoted string, possibly containing escape sequences
             (r"'[^'\\]*(\\.[^'\\]*)*'", 0, STYLES['string']),
 
-            # Comments. from '//' until a newline
+            # Comments from '//' until a newline
             (r'//[^\n]*', 0, STYLES['comment']),
+
+           
 
             # Numeric literals
             (r'\b[+-]?[0-9]+[lL]?\b', 0, STYLES['numbers']),
@@ -166,6 +170,9 @@ class CSharpHighlighter(QSyntaxHighlighter):
 
             # Class
             (r'\bClass\b',0,STYLES['class']),
+
+            # 'class' followed by an identifier	
+            (r'\bclass\b\s*(\w+)', 1, STYLES['classID']),
         ]
 
         # Build a QRegExp for each pattern

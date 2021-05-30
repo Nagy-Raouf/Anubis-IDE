@@ -38,7 +38,8 @@ STYLES = {
        'numbers': format('purple'),
         'logicalOperators': format('green'),
         'literalKeywords':format('lightBlue'),
-        'accessKeywords': format('lightBlue')
+        'accessKeywords': format('lightBlue'),
+        'typeKeywords':format('blue')
 
 
    }
@@ -56,7 +57,7 @@ class CSharpHighlighter(QSyntaxHighlighter):
         'virtual', 'volatile',
 
     #Access Modifier Keywords
-        'public', 'private', 'protected', 'internal'
+        'public', 'private', 'protected', 'internal',
     
     #Statement Keywords
         'if', 'else', 'switch', 'case', 'do', 'for',
@@ -82,6 +83,13 @@ class CSharpHighlighter(QSyntaxHighlighter):
 
     literalKeywords = [
         'null', 'false', 'true', 'value', 'void'
+    ]
+
+    typeKeywords = [
+        'bool', 'byte', 'char', 'class', 'decimal',
+         'double', 'enum', 'float', 'int', 'long', 
+         'sbyte', 'short', 'string', 'struct', 'uint', 
+         'ulong', 'ushort'
     ]
 
     accessKeywords = [
@@ -137,6 +145,8 @@ class CSharpHighlighter(QSyntaxHighlighter):
                   for b in CSharpHighlighter.literalKeywords]
         rules += [(r'%s' % b, 0, STYLES['accessKeywords'])
                   for b in CSharpHighlighter.accessKeywords]
+        rules += [(r'%s' % b, 0, STYLES['typeKeywords'])
+                  for b in CSharpHighlighter.typeKeywords]
 
         # All other rules
         rules += [

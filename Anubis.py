@@ -7,6 +7,7 @@ import sys
 import glob
 import serial
 
+import CSharp_Coloring
 import Python_Coloring
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -69,7 +70,9 @@ class Signal(QObject):
 # Making text editor as A global variable (to solve the issue of being local to (self) in widget class)
 text = QTextEdit
 text2 = QTextEdit
-
+# There is no language by default 
+global language 
+language = ""
 #
 #
 #
@@ -88,7 +91,7 @@ class text_widget(QWidget):
     def itUI(self):
         global text
         text = QTextEdit()
-        Python_Coloring.PythonHighlighter(text)
+        #Python_Coloring.PythonHighlighter(text)
         hbox = QHBoxLayout()
         hbox.addWidget(text)
         self.setLayout(hbox)
@@ -114,9 +117,10 @@ class text_widget(QWidget):
 #
 class Widget(QWidget):
 
-    def __init__(self):
+    def __init__(self,ui):
         super().__init__()
         self.initUI()
+        self.ui = ui
 
     def initUI(self):
 
@@ -185,9 +189,18 @@ class Widget(QWidget):
     # defining a new Slot (takes string) to save the text inside the first text editor
     @pyqtSlot(str)
     def Saving(s):
-        with open('main.py', 'w') as f:
-            TEXT = text.toPlainText()
-            f.write(TEXT)
+        print(language)
+        if language == "python":
+           with open('main.py', 'w') as f:
+               textToSave = text.toPlainText()
+               f.write(textToSave)
+        elif language == "C#":
+           with open('main.cs', 'w') as f:
+               textToSave = text.toPlainText()
+               f.write(textToSave)
+        else:
+           text2.append("Please, Choose a language.")
+
 
     # defining a new Slot (takes string) to set the string to the text editor
     @pyqtSlot(str)
@@ -199,6 +212,12 @@ class Widget(QWidget):
 
         nn = self.sender().model().filePath(index)
         nn = tuple([nn])
+        
+        fileExtension = nn[0].split(".")[1]
+        if fileExtension == "py":
+            UI.pythonEditor(self.ui)
+        elif fileExtension == "cs":
+            UI.csharpEditor(self.ui)
 
         if nn[0]:
             f = open(nn[0],'r')
@@ -260,6 +279,7 @@ class UI(QMainWindow):
         filemenu = menu.addMenu('File')
         Port = menu.addMenu('Port')
         Run = menu.addMenu('Run')
+        languageMenu = menu.addMenu('Language')
 
         # As any PC or laptop have many ports, so I need to list them to the User
         # so I made (Port_Action) to add the Ports got from (serial_ports()) function
@@ -300,19 +320,30 @@ class UI(QMainWindow):
         filemenu.addAction(Open_Action)
 
 
+        pythonChoice = QAction('Python', self)
+        pythonChoice.triggered.connect(self.pythonEditor)
+        csharpChoice = QAction('C#', self)
+        csharpChoice.triggered.connect(self.csharpEditor)
+        languageMenu.addAction(pythonChoice)
+        languageMenu.addAction(csharpChoice)
+
         # Seting the window Geometry
         self.setGeometry(200, 150, 600, 500)
         self.setWindowTitle('Anubis IDE')
         self.setWindowIcon(QtGui.QIcon('Anubis.png'))
         
 
-        widget = Widget()
+        widget = Widget(self)
 
         self.setCentralWidget(widget)
         self.show()
 
     ###########################        Start OF the Functions          ##################
     def Run(self):
+
+        if language == "":
+            text2.append("Choose a language")
+
         if self.port_flag == 0:
             mytext = text.toPlainText()
         #
@@ -325,6 +356,15 @@ class UI(QMainWindow):
         else:
             text2.append("Please Select Your Port Number First")
 
+    def pythonEditor(self):
+        global language
+        language = "python"
+        Python_Coloring.PythonHighlighter(text)
+       
+    def csharpEditor(self):
+        global language
+        language = "C#"
+        CSharp_Coloring.CSharpHighlighter(text)
 
     # this function is made to get which port was selected by the user
     @QtCore.pyqtSlot()
@@ -343,13 +383,19 @@ class UI(QMainWindow):
     # I made this function to open a file and exhibits it to the user in a text editor
     def open(self):
         file_name = QFileDialog.getOpenFileName(self,'Open File','/home')
+        file_extension = file_name[0].split(".")[1]
 
         if file_name[0]:
             f = open(file_name[0],'r')
-            with f:
-                data = f.read()
-            self.Open_Signal.reading.emit(data)
-
+            with f:	
+                if file_extension == "py":	
+                    data = f.read()	
+                    self.Open_Signal.reading.emit(data)
+                    self.pythonEditor();
+                elif file_extension == "cs":	
+                    data = f.read()	
+                    self.Open_Signal.reading.emit(data)	
+                    self.csharpEditor()
 
 #
 #

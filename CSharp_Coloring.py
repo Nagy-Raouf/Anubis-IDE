@@ -81,7 +81,20 @@ class CSharpHighlighter(QSyntaxHighlighter):
         'join', 'let', 'in', 'on', 'equals', 'by', 'ascending', 'descending'
     ]
 
+    literalKeywords = [
+        'null', 'false', 'true', 'value', 'void'
+    ]
 
+    typeKeywords = [
+        'bool', 'byte', 'char', 'class', 'decimal',
+         'double', 'enum', 'float', 'int', 'long', 
+         'sbyte', 'short', 'string', 'struct', 'uint', 
+         'ulong', 'ushort'
+    ]
+
+    accessKeywords = [
+        'base','this'
+    ]
 
     # CSharp operators
     operators = [
